@@ -127,8 +127,6 @@ Mapper      Map;                                            // Default: 25x25 gr
 unsigned long update_t;     // Used for timing/flow control for main loop()
 unsigned long behaviour_t;  // Use to track how long a behaviour has run.
 
-float last_angle_diff;
-
 // used by timer3.h to calculate left and right wheel speed.
 volatile float l_speed_t3, r_speed_t3;
 
@@ -136,9 +134,8 @@ volatile float l_speed_t3, r_speed_t3;
 // can be in.
 int STATE;
 #define STATE_CALIBRATE       0    // calibrates line sensor
-#define STATE_ROTATE          1    // rotates 360 degrees
-#define STATE_STOP            2    // stops
-
+#define STATE_INITIAL         1     // picks a random next state
+#define STATE_FOLLOW_LINE     2     // Basic line following.
 #define STATE_RANDOM_WALK     3     // Robot will make random turns 6 seconds
 #define STATE_DRIVE_STRAIGHT  4     // Robot drives in a straight line 3 seconds
 #define STATE_TURN_TO_ZERO    5     // Turns so the robot faces theta = 0
@@ -147,7 +144,8 @@ int STATE;
 
 
 /*****************************************************************************
-    SETUP RUNS ONCE ON POWER UP.
+    SETUP
+    REQUIRED, RUNS ONCE ON POWER UP.
 *****************************************************************************/
 void setup() {
 
@@ -155,6 +153,7 @@ void setup() {
   pinMode( BUZZER_PIN, OUTPUT );
   pinMode(DEBUG_LED, OUTPUT );
   pinMode(IR_PROX_PIN, INPUT);
+
 
   // Push buttons.  Note that, by doing a
   // digital write, the button has a default
@@ -178,8 +177,6 @@ void setup() {
   // See mapping.h for MAP_X/Y definitions.
   RomiPose.setPose( MAP_X / 2, MAP_Y / 2, 0 );
 
-  last_angle_diff = 2*PI + 1;
-
   // Start up the serial port.
   Serial.begin(9600);
 
@@ -195,12 +192,17 @@ void setup() {
   // This function reads buttons A and B, and will
   // block your Romi from finishing Startup up until
   // a button is pressed.
-  decideStartUpFromButtons();
+  // Please look into helper function section below.
+
+  // decideStartUpFromButtons();
 
   // set Initial State, also resets timestamps
   changeState( STATE_CALIBRATE );
 
 }// end of setup, Ready to go!
+
+
+
 
 
 
@@ -210,37 +212,102 @@ void setup() {
 *****************************************************************************/
 void loop() {
   
+
   // Always update kinematics
   RomiPose.update( e0_count, e1_count );
 
-  // Runs a behaviour every 100ms, skips otherwise.
+  // Runs a behaviour every 50ms, skips otherwise.
+  // Therefore, behaviours update 20 times a second
   if (  millis() - update_t > 100 ) {
-    // Serial.println(IRSensor0.getDistanceRaw());
-    // Serial.println(IRSensor0.getDistanceInMM());
-
+    Serial.println(IRSensor0.getDistanceRaw());
     update_t = millis();
 
-    switch ( STATE ) {
+    // We check for a line, and if we find one
+    // we immediately change state to line following.
+    // if ( LineSensor.onLine( LINE_THRESHOLD ) ) {
+
+    //   // Record that we found a line.
+    //   Map.updateMapFeature( 'L' , RomiPose.x, RomiPose.y );
+
+    //   // Set next state to line following, caught
+    //   // by switch below
+    //   changeState( STATE_FOLLOW_LINE );
+
+    // }
+
+    // We always check for obstacles.  If we
+    // detect one, we immediately change state
+    // to avoid obstacles. Note, comes after
+    // line detection, so in effect higher
+    // priority ( the last to change the state)
+    //if ( SERIAL_ACTIVE ) Serial.println( IRSensor0.getDistanceInMM() );
+    // if ( IRSensor0.getDistanceInMM() < IR_DETECTD_THRESHOLD ) {
+
+    //   // Record that we found an obstruction
+    //   // Note that, this places the object in the map at
+    //   // the romi x/y, not taking account for the distance
+    //   // measure to the object itself.
+    //   // Using LED just to see if it is working.
+    //   digitalWrite(DEBUG_LED, HIGH);
+    //   Map.updateMapFeature( 'O' , RomiPose.x, RomiPose.y );
+
+    //   // Set next state to obstacle avoidance,
+    //   // caught be switch below.
+    //   changeState( STATE_AVOID_OBSTACLE );
+
+    // } else {
+    //   digitalWrite(DEBUG_LED, LOW);
+    // }
+
+    // Note that, STATE is set at the transition (exit)
+    // out of any of the below STATE_ functions, with the 
+    // exception of finding the line or an obstacle above.
+    // You should rebuild this state machine to suit your
+    // objective.  You can do this by changing which state
+    // is set when a behaviour finishes (see behaviours code).
+  //   switch ( STATE ) {
       
-      case STATE_CALIBRATE:
-        calibrateSensors();
-        break;
+  //     case STATE_CALIBRATE:
+  //       calibrateSensors();
+  //       break;
 
-      case STATE_ROTATE:
-        // rotateFullCircle();
-        rotateFullCircle();
-        break;
+  //     case STATE_INITIAL:
+  //       initialBehaviour();
+  //       break;
 
-      case STATE_STOP:
-        stopRobot();
-        break;
+  //     case STATE_FOLLOW_LINE:
+  //       followLine();
+  //       break;
 
-      default: // unknown, this would be an error.
-        reportUnknownState();
-        break;
+  //     case STATE_RANDOM_WALK:
+  //       randomWalk();
+  //       break;
 
-    } // End of state machine switch()
+  //     case STATE_DRIVE_STRAIGHT:
+  //       driveStraight();
+  //       break;
+
+  //     case STATE_TURN_TO_ZERO:
+  //       turnToThetaZero( );
+  //       break;
+
+  //     case STATE_TURN_TO_PIOVER2:
+  //       turnToThetaPIOver2( );
+  //       break;
+
+  //     case STATE_AVOID_OBSTACLE:
+  //       avoidObstacle();
+  //       break;
+
+  //     default: // unknown, this would be an error.
+  //       reportUnknownState();
+  //       break;
+
+  //   } // End of state machine switch()
   } // End of update_t if()
+
+  // Small delay to prevent millis = 0
+  delay(1);
 
 }// End of Loop()
 
@@ -250,6 +317,8 @@ void loop() {
     Helper functions.
     These are used to perform some operations which are not a 
     significant part of the Romi behaviour or state machine.
+
+
 *****************************************************************************/
 
 // Setup helper function to take user input and initiate
@@ -261,13 +330,10 @@ void decideStartUpFromButtons() {
   // You may wish to improve this code to make
   // the user input more robust.
   int mode = -1;
-  
-  
   do {
 
-    if ( SERIAL_ACTIVE ) Serial.println("Waiting for button A to start map scan...");
+    if ( SERIAL_ACTIVE ) Serial.println("Waiting for button a (print map) or b (erase map)");
 
-    // Get input from buttons
     int btn_a = digitalRead( BUTTON_A );
     int btn_b = digitalRead( BUTTON_B );
 
@@ -283,6 +349,22 @@ void decideStartUpFromButtons() {
 
   // Acknowledge button press.
   beep();
+
+  if ( mode == 0 ) {  // Print map
+
+    // Because 1 will always be true, you Romi
+    // will no be stuck in this loop forever.
+    while ( 1 ) {
+      Map.printMap();
+      delay(2000);
+    }
+
+  }
+
+  if ( SERIAL_ACTIVE ) Serial.println("Erasing Map, activating Romi");
+
+  Map.resetMap();
+
 }
 
 // Note, this blocks the flow/timing
@@ -305,6 +387,9 @@ void reportUnknownState() {
 /*****************************************************************************
     BEHAVIOURS
     An assortment of behaviours called variously by state machine from Loop.
+    You can take inspiration from these to write your own behaviours.
+    You will need to build up your own state machine.
+    Feel free to start from scratch - you don't have to use this example.
 *****************************************************************************/
 
 // The state transition behaviour.
@@ -361,35 +446,123 @@ void calibrateSensors() {
 
   // After calibrating, we send the robot to
   // its initial state.
-  changeState( STATE_ROTATE );
+  changeState( STATE_INITIAL );
 }
 
 
-void rotateFullCircle() {
+// No initial behaviour for this example.
+// You might want to setup a proper initial behaviour
+// routine.
+// But we'll use it to instead decide a
+// random next state.
+void initialBehaviour() {
 
-  float demand_angle = 2 * PI;
+  // Note: we don't select 0 as this is CALIBRATE
+  //       we don't select 1 as this is INITIAL (this function)
+  //       and random is returning up to 8 (e.g., 7.9) which
+  //       is rounded down by (int) to just 7
+  int which = (int)random( 2, 8 );
 
-  // Set motor power.
-  L_Motor.setPower(20);
-  R_Motor.setPower(-20);
+  // Action state transition
+  changeState( which );
+}
 
-  float angle_diff = demand_angle - RomiPose.theta;
+void driveStraight() {
 
-  if (angle_diff > last_angle_diff){
-    // This ensures that the PID are reset and sets the new STATE flag.
-    changeState( STATE_STOP );
+  // If we have been doing this for more than 3 seconds,
+  // we transition out of this behaviour.
+  // Note that, behaviour_t is reset by the changeState
+  // function, called by every state when transitioning.
+  unsigned long elapsed_t = (millis() - behaviour_t );
+  if (  elapsed_t > 3000 ) {   // More than 3s, change state.
+
+    // This ensures that the PID are reset
+    // and sets the new STATE flag.
+    changeState( STATE_INITIAL );
+    return;
+
+  } else { // Otherwise, drive straight.
+
+    // We want to keep the difference in the Romi theta
+    // between time steps to 0.
+    float delta_theta = RomiPose.last_theta - RomiPose.theta;
+
+    // Demand 0, change in theta is measurement.
+    float bearing = H_PID.update( 0, delta_theta );
+
+    // Foward speed.
+    float fwd_bias = STRAIGHT_FWD_SPEED;
+
+    // PID speed control.
+    float l_pwr = L_PID.update( (fwd_bias - bearing), l_speed_t3 );
+    float r_pwr = R_PID.update( (fwd_bias + bearing), r_speed_t3 );
+
+    // Write power to motors.
+    L_Motor.setPower(l_pwr);
+    R_Motor.setPower(r_pwr);
+
   }
-
-  last_angle_diff = angle_diff;
 }
 
-  
+void avoidObstacle() {
 
-void stopRobot() {
 
-  // do nothing
+  // Get a distance measurement to object.
+  float distance = IRSensor0.getDistanceInMM();
+
+  // If we are a safe distance away, change state.
+  if (  distance > IR_AVOIDED_THRESHOLD ) {
+
+    // This ensures that the PID are reset
+    // and sets the new STATE flag.
+    changeState( STATE_INITIAL );
+    return;
+
+  } else { // Otherwise, Turn away from obstacle.
+
+    // Using straight foward speed.
+    float turn = STRAIGHT_FWD_SPEED;
+
+    // PID speed control, but we just turn on the spot
+    float l_pwr = L_PID.update( (0 - turn), l_speed_t3 );
+    float r_pwr = R_PID.update( (0 + turn), r_speed_t3 );
+
+    // Write power to motors.
+    L_Motor.setPower(l_pwr);
+    R_Motor.setPower(r_pwr);
+
+  }
 }
 
+void followLine() {
+
+
+  // If we have lost the line, we change state.
+  if ( LineSensor.onLine( LINE_THRESHOLD ) == false ) {
+
+    // This ensures that the PID are reset
+    // and sets the new STATE flag.
+    changeState( STATE_INITIAL  );
+
+  } else {    // else, line following behaviour
+
+    // Measurement is the different in angle, demand is 0
+    // bearing steers us to minimise difference toward 0
+    float line_heading  = LineSensor.getHeading();
+    float steering      = H_PID.update( 0, line_heading );
+    float fwd_bias      = LINE_FOLLOW_SPEED;
+
+    // Append to motor speed control
+    float l_pwr = L_PID.update( (fwd_bias - steering), l_speed_t3 );
+    float r_pwr = R_PID.update( (fwd_bias + steering), r_speed_t3 );
+
+    // Set motor power.
+    L_Motor.setPower(l_pwr);
+    R_Motor.setPower(r_pwr);
+
+  } // end of oneLine()==false if()
+
+}// end of behaviour
 
 void turnToThetaPIOver2() {
 
@@ -411,7 +584,7 @@ void turnToThetaPIOver2() {
 
     // This ensures that the PID are reset
     // and sets the new STATE flag.
-    changeState( STATE_STOP  );
+    changeState( STATE_INITIAL  );
 
   } else {    // else, turning behaviour
 
@@ -430,4 +603,97 @@ void turnToThetaPIOver2() {
   } // end of abs(diff)<0.03 if()
 
 }// end of behaviour
+
+void turnToThetaZero() {
+
+  float demand_angle = 0;
+
+  // https://stackoverflow.com/questions/1878907/the-smallest-difference-between-2-angles
+  // Some crazy atan2 magic.
+  // Treats the difference in angle as cartesian x,y components.
+  // Cos and Sin are effectively wrapping the values between -1, +1, with a 90 degree phase.
+  // So we can pass in values larger than TWO_PI or less than -TWO_PI fine.
+  // atan2 returns -PI/+PI, giving us an indication of direction to turn.
+  float diff = atan2( sin( ( demand_angle - RomiPose.theta) ), cos( (demand_angle - RomiPose.theta) ) );
+
+  // If we have got the Romi theta to roughly match
+  // the demand (by getting the difference to 0(ish)
+  // We transition out of this behaviour.
+  if ( abs( diff ) < 0.03 ) {
+    changeState( STATE_INITIAL  );
+
+  } else {    // else, turning behaviour
+
+    // Measurement is the different in angle, demand is 0
+    // bearing steers us to minimise difference toward 0
+    float bearing = H_PID.update( 0, diff );
+
+    // Append to motor speed control
+    float l_pwr = L_PID.update( (0 - bearing), l_speed_t3 );
+    float r_pwr = R_PID.update( (0 + bearing), r_speed_t3 );
+
+    // Set motor power.
+    L_Motor.setPower(l_pwr);
+    R_Motor.setPower(r_pwr);
+
+  } // end of abs(diff)<0.03 if()
+
+}// end of behaviour
+
+void randomWalk() {
+
+  // If we have been doing this for more than 6 seconds,
+  // we transition out of this behaviour.
+  unsigned long elapsed_t = (millis() - behaviour_t );
+  if (  elapsed_t > 6000 ) {   // Change state.
+
+    // This ensures that the PID are reset
+    // and sets the new STATE flag.
+    changeState( STATE_INITIAL );
+    return;
+
+  } else { // Otherwise, conduct a random walk behaviour
+
+    // We change the motor demands at an interval of the
+    // elapsed time using the remainder operation.
+    if ( (elapsed_t % 10) == 0 ) { // if true, new turn.
+
+      // Here, the turn is set to a gaussian number.
+      // = randGaussian( mean, standard deviation)
+      // So, it will draw a random number (+/-)
+      // that average out to 0 over time, but have
+      // a distribution S.D of +/- 5 (set below).
+      // Therefore, small turns usually, sometimes big.
+      float turn_bias = randGaussian( 0, 5 );
+      float fwd_bias = 4;
+
+      // Append to motor speed control
+      float l_pwr = L_PID.update( (fwd_bias - turn_bias), l_speed_t3 );
+      float r_pwr = R_PID.update( (fwd_bias + turn_bias), r_speed_t3 );
+
+      L_Motor.setPower(l_pwr);
+      R_Motor.setPower(r_pwr);
+
+    } else {  // no update to turn, but update PID speed control
+
+      // Here, we use a special method in our PID class which
+      // updates the feedback assuming the demand has not changed.
+      // The PID class stores the last_demand, so here we only
+      // provide the measurement as an argument.
+      float l_pwr = L_PID.update( l_speed_t3 );
+      float r_pwr = R_PID.update( r_speed_t3 );
+
+      // Set motor speeds.
+      L_Motor.setPower(l_pwr);
+      R_Motor.setPower(r_pwr);
+
+    } // End of (elapsed_t % 10) if()
+  }// End of (elapsed_t > 6000) if()
+
+}// End of this behaviour.
+
+
+
+
+
 

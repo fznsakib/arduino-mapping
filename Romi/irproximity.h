@@ -32,11 +32,16 @@ float SharpIR::getDistanceInMM() {
     
     float distance = (float)analogRead( pin );
     
-    // map this to 0 : 5v range.
+    // map 8-bit value to 0 : 5v range.
     distance *= 0.0048;
 
-    const float exponent = (1/-0.616);
-    distance = pow( ( distance / 12.494 ), exponent);
+
+    // const float exponent = (1/-0.616);
+    // distance = pow( ( distance / 12.494 ), exponent);
+    
+    const float exponent = (1/-0.8);
+    distance = pow( ( distance / 22 ), exponent);
+
     distance *= 10; // to mm.
        
     return distance;

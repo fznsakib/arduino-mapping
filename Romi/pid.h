@@ -167,8 +167,4 @@ float PID::update( float measurement) {
   return output_signal;
 }
 
-
-
-
-
 #endif

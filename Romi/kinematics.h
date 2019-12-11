@@ -82,8 +82,8 @@ void Kinematics::update( long e0, long e1 ) {
   // keep track of angular change else where in 
   // the program.
   last_theta = theta;
-  
 
+  
   // Set new theta.
   theta = theta + new_theta;
 
