@@ -1,47 +1,5 @@
-/*
-       @@@@@@@@@@@&*           %@@@@@%       @@@@@@@@@    @@@@@@@@@  @@@@@@@@
-       @@@@@@@@@@@@@@@     #@@@@@@@@@@@@    @@@@@@@@@@   @@@@@@@@@* @@@@@@@@@
-       @@@@@@   @@@@@@   /@@@@@%  .@@@@@@    @@@/@@@@@ @@@@@@@@@@    @@@@@@
-      &@@@@@##&@@@@@@   @@@@@@(   @@@@@@@   @@@,.@@@@@@@@,.@@@@@    @@@@@@
-      @@@@@@@@@@@@@    &@@@@@@    @@@@@@   @@@@  @@@@@@@  @@@@@    (@@@@@
-     @@@@@@  @@@@@@*   @@@@@@    @@@@@@   .@@@   @@@@@#  @@@@@@    @@@@@&
-   @@@@@@@@   @@@@@@%  .@@@@@@@@@@@@@    @@@@@%  @@@@  @@@@@@@@  @@@@@@@@
-  %@@@@@@@&   @@@@@@     #@@@@@@@@      @@@@@@   @@@   @@@@@@@/ @@@@@@@@%
 
-  Provided by Paul O'Dowd Nov 2019
-
-  Uploading this code, your Romi should:
-    - Do nothing until button A or B are pressed.
-    - If button A, it will print the last known map.
-    - If button B, it will erase the map and begin operation.
-    - Randomly switch between driving straight, turning 90* or 0*,
-      driving a random walk, following a line, avoid obstacles.
-    - Record lines and obstacles into the map as 'L' and 'O'. 
-      Note that, if a sensor is not plugged in or correctly, you
-      may get these added to the map randomly and see strange 
-      behaviours from your Romi.  
-  
-  You will need to:
-    - Read through this code to undestand what is going on.
-    - You may wish to comment out code to a bare minimum for your
-      task, or as a starting point.
-    - Possibly try some of your own code first, to ensure your
-      Romi and sensors are working ok.
-    - Check where sensors are wired in relative to this code.
-      You can find which pins are in use in the #define section
-      below.
-    - Check PID tuning - especially if your robot is shakey.
-    - Complete classes such as irproximity.h, mapping.h
-    - Adjust the dimensions of the map to suit your task.
-    - Look at the advanced labsheets for some topics.
-    - Decide if you want to use any of this code.
-    - Begin to build your own system.
-*/
-
-/*****************************************************************************
-    INCLUDES (global)
-
-*****************************************************************************/
+/*****************************************************************************/
 #include "timer3.h"     // setup/isr for timer3 to calculate wheel speed.
 #include "encoders.h"   // setup and isr to manage encoders.
 #include "kinematics.h" // calculates x,y,theta from encoders.
@@ -92,9 +50,9 @@ u8 USB_SendSpace(u8 ep);
 
 // Speed controller for motors.
 // Using same gains for left and right.
-#define SPD_PGAIN     3.5
-#define SPD_IGAIN     0.1
-#define SPD_DGAIN     -1.5
+#define SPD_PGAIN     1.0
+#define SPD_IGAIN     0.078
+#define SPD_DGAIN     0.006
 
 // PID controller gains for heading feedback
 #define H_PGAIN   1.8
@@ -145,6 +103,10 @@ int STATE;
 #define STATE_TURN_TO_PIOVER2 6     // Turns so the robot faces theta = PI/2 (90*)
 #define STATE_AVOID_OBSTACLE  7
 
+float distances[360];
+float current_angle;
+
+
 
 /*****************************************************************************
     SETUP RUNS ONCE ON POWER UP.
@@ -179,6 +141,7 @@ void setup() {
   RomiPose.setPose( MAP_X / 2, MAP_Y / 2, 0 );
 
   last_angle_diff = 2*PI + 1;
+  current_angle = -1;
 
   // Start up the serial port.
   Serial.begin(9600);
@@ -227,7 +190,6 @@ void loop() {
         break;
 
       case STATE_ROTATE:
-        // rotateFullCircle();
         rotateFullCircle();
         break;
 
@@ -366,28 +328,77 @@ void calibrateSensors() {
 
 
 void rotateFullCircle() {
-
-  float demand_angle = 2 * PI;
-
-  // Set motor power.
-  L_Motor.setPower(20);
-  R_Motor.setPower(-20);
-
-  float angle_diff = demand_angle - RomiPose.theta;
-
-  if (angle_diff > last_angle_diff){
-    // This ensures that the PID are reset and sets the new STATE flag.
-    changeState( STATE_STOP );
+  int inc = 1;
+  
+  if (current_angle >= 355 - inc) {
+    changeState(STATE_STOP);
+    return;
   }
 
-  last_angle_diff = angle_diff;
+  float demand_angle = current_angle + inc;
+
+  float factor = 11.0 / 72.0;
+
+  float demand = 0.10;
+
+  float l_speed = l_speed_t3 * factor;
+  float r_speed = r_speed_t3 * factor;
+
+  float L_output = L_PID.update(demand, l_speed); 
+  float R_output = R_PID.update(-demand, r_speed);
+
+  // Set motor power.
+  L_Motor.setPower(L_output);
+  R_Motor.setPower(R_output);
+
+  // convert theta to degree
+  float theta = RomiPose.theta * (180 / PI);
+  float angle_diff = demand_angle - theta;
+
+  Serial.print(theta);
+  Serial.print(", ");
+  Serial.println(current_angle);
+
+  if (angle_diff < 0){
+    Serial.print("angle measured: ");
+    Serial.println(current_angle);
+    distances[(int) current_angle] = IRSensor0.getDistanceInMM();
+    current_angle += inc;
+  }
 }
 
   
 
 void stopRobot() {
+  int mode = -1;
+  
+  do {
 
-  // do nothing
+    if ( SERIAL_ACTIVE ) Serial.println("Waiting for button B to print distances...");
+
+    // Get input from buttons
+    int btn_b = digitalRead( BUTTON_B );
+
+    // Decide if we are going to print
+    // or erase the map.
+    if ( btn_b == LOW ) {
+      mode = 0;
+
+      // Print distances here
+      for (int i=0; i < 360; i++){
+        // Serial.print(i);
+        // Serial.print(" : ");
+        Serial.println(distances[i]);
+      }
+    } 
+
+  } while ( mode < 0 );
+
+  // Acknowledge button press.
+
+  beep();
+  exit(0);
+
 }
 
 

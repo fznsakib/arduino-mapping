@@ -76,7 +76,7 @@ void Kinematics::update( long e0, long e1 ) {
   // straight-line approximation for curves.
   float new_x = (( v0 * wheel_radius ) + ( v1 * wheel_radius )) / 2;
   
-  float new_theta = (( v0 * wheel_radius) - (v1 * wheel_radius ) ) / (2 * wheel_sep );
+  float delta_theta = (( v0 * wheel_radius) - (v1 * wheel_radius ) ) / (2 * wheel_sep );
 
   // record current theta as 'old' so that we can
   // keep track of angular change else where in 
@@ -85,7 +85,7 @@ void Kinematics::update( long e0, long e1 ) {
 
   
   // Set new theta.
-  theta = theta + new_theta;
+  theta = theta + delta_theta;
 
   // Lets wrap theta to keep it between 0 and TWO_PI
   // Not strictly necessary, but predictable at least.
