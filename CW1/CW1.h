@@ -15,7 +15,8 @@ u8 USB_SendSpace(u8 ep);
 #define BUZZER_PIN 6
 #define BUTTON_B   30
 
-#define IR_PROX_PIN     A0
+#define IR_PROX_PIN0    A0
+#define IR_PROX_PIN1    A3
 #define LINE_LEFT_PIN   A2
 #define LINE_CENTRE_PIN A3
 #define LINE_RIGHT_PIN  A4
@@ -23,7 +24,8 @@ u8 USB_SendSpace(u8 ep);
 LineSensor line_left(LINE_LEFT_PIN);
 LineSensor line_centre(LINE_CENTRE_PIN);
 LineSensor line_right(LINE_RIGHT_PIN);
-SharpIR    IRSensor0( IR_PROX_PIN );
+SharpIR    IRSensor0( IR_PROX_PIN0 );
+SharpIR    IRSensor1( IR_PROX_PIN1 );
 
 #define kp_left_speed 90.00
 #define ki_left_speed 0.50
