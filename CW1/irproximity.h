@@ -39,8 +39,10 @@ float SharpIR::getDistanceInMM() {
     // const float exponent = (1/-0.616);
     // distance = pow( ( distance / 12.494 ), exponent);
     
-    const float exponent = (1/-0.8);
-    distance = pow( ( distance / 22 ), exponent);
+    // ((voltages**1.38 / 20) ** (1 / -0.78)) + 5
+
+    const float exponent = (1/-0.78);
+    distance = pow( ( pow(distance, 1.38) / 20 ), exponent) + 5;
 
     distance *= 10; // to mm.
        
