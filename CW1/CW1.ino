@@ -23,7 +23,7 @@ void setup() {
   Serial.begin(9600);
 
   STATE = STATE_INITIAL;
-  
+
 }
 
 
@@ -38,13 +38,13 @@ void loop() {
   switch(STATE) {
 
     case STATE_INITIAL:
-      initialising_beeps(); 
+      initialising_beeps();
       break;
 
     case STATE_TURN_TO_THETA:
       turn_to_theta();
       break;
-    
+
     case STATE_PRINT_DISTANCES:
       print_distances();
       break;
@@ -62,7 +62,7 @@ void loop() {
 void initialising_beeps() {
 
   initial_beeps_time_now = millis();
-  
+
   if (initial_beeps <= 2) {
     initial_beeps_time_elapsed = initial_beeps_time_now - initial_beeps_timestamp;
     if (initial_beeps_time_elapsed < 500) {
@@ -76,7 +76,7 @@ void initialising_beeps() {
       initial_beep = !initial_beep;
       initial_beeps += 1;
     }
-    
+
   } else  {
 
     analogWrite(BUZZER_PIN,  0);
@@ -85,7 +85,7 @@ void initialising_beeps() {
     approach_pid_timestamp = millis();
 
     STATE = STATE_TURN_TO_THETA;
-    
+
   }
 }
 
@@ -112,8 +112,16 @@ void turn_to_theta() {
 
     int degrees = floor(kinematics.get_theta() * 180 / M_PI);
 
-    distances[degrees] = IRSensor0.getDistanceInMM();
-    
+    float ir0 = IRSensor0.getDistanceInMM();
+    float ir1 = IRSensor1.getDistanceInMM();
+    float offset = 50; // mm
+    float distance = (ir0 + (ir1 - offset)) / 2;
+
+    distances[degrees] = distance;
+    Serial.print(ir0);
+    Serial.print(",");
+    Serial.println(ir1);
+
   } else {
 
     drive_motor(LEFT_MOTOR,  0);
@@ -126,15 +134,15 @@ void turn_to_theta() {
     right_speed_output = 0;
 
     STATE = STATE_PRINT_DISTANCES;
-    
+
   }
-  
+
 }
 
 void print_distances() {
 
   int mode = -1;
-  
+
   do {
 
     if (SERIAL_ACTIVE) Serial.println("Waiting for button B to print distances...");
@@ -155,7 +163,7 @@ void print_distances() {
       }
       Serial.println("]");
       Serial.println("Done");
-    } 
+    }
 
   } while (mode < 0);
 
