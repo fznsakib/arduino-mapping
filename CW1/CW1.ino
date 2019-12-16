@@ -117,7 +117,8 @@ void turn_to_theta() {
     float offset = 50; // mm
     float distance = (ir0 + (ir1 - offset)) / 2;
 
-    distances[degrees] = ir0;
+    distances[degrees] += ir0;
+    distances[degrees] /= 2;
     Serial.print(ir0);
     Serial.print(",");
     Serial.println(ir1);
