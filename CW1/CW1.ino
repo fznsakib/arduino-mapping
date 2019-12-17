@@ -114,10 +114,10 @@ void turn_to_theta() {
 
     float ir0 = IRSensor0.getDistanceInMM();
     float ir1 = IRSensor1.getDistanceInMM();
-    float offset = 50; // mm
+    float offset = 46; // mm
     float distance = (ir0 + (ir1 - offset)) / 2;
 
-    distances[degrees] += ir0;
+    distances[degrees] += distance;
     distances[degrees] /= 2;
     Serial.print(ir0);
     Serial.print(",");

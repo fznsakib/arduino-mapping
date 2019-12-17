@@ -16,7 +16,7 @@ u8 USB_SendSpace(u8 ep);
 #define BUTTON_B   30
 
 #define IR_PROX_PIN0    A0
-#define IR_PROX_PIN1    A3
+#define IR_PROX_PIN1    A2
 #define LINE_LEFT_PIN   A2
 #define LINE_CENTRE_PIN A3
 #define LINE_RIGHT_PIN  A4
