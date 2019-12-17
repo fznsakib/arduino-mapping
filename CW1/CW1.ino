@@ -114,8 +114,17 @@ void turn_to_theta() {
 
     float ir0 = IRSensor0.getDistanceInMM();
     float ir1 = IRSensor1.getDistanceInMM();
-    float offset = 46; // mm
-    float distance = (ir0 + (ir1 - offset)) / 2;
+    float offset  = 46;  // mm
+    float minDist = 100; // mm
+
+    float distance;
+    if(ir1 >= minDist + offset) {
+      // both sensors far enough
+      distance  = (ir0 + (ir1 - offset)) / 2;
+    } else {
+      // IR0 is too close
+      distance = ir1 - offset;
+    }
 
     distances[degrees] += distance;
     distances[degrees] /= 2;
