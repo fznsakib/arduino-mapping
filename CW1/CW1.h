@@ -86,6 +86,7 @@ float drive_home_turn;
 
 int degrees;
 int distances[360];
+int distances2[360];
 
 void calibrate_sensors() {
   line_left.calibrate();

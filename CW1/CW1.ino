@@ -67,7 +67,7 @@ void initialising_beeps() {
     initial_beeps_time_elapsed = initial_beeps_time_now - initial_beeps_timestamp;
     if (initial_beeps_time_elapsed < 500) {
       if (initial_beep) {
-        // analogWrite(BUZZER_PIN, 10);
+        analogWrite(BUZZER_PIN, 10);
       } else {
         analogWrite(BUZZER_PIN,  0);
       }
@@ -102,8 +102,8 @@ void turn_to_theta() {
     if (turn_to_theta_pid_time_elapsed > 10) {
       turn_to_theta_pid_timestamp = turn_to_theta_pid_time_now;
 
-      left_speed_output = left_speed_PID.update(constrain(difference, -0.01, 0.01), timer_left_speed);
-      right_speed_output = right_speed_PID.update(-constrain(difference, -0.01, 0.01), timer_right_speed);
+      left_speed_output = left_speed_PID.update(constrain(difference, -0.07, 0.07), timer_left_speed);
+      right_speed_output = right_speed_PID.update(-constrain(difference, -0.07, 0.07), timer_right_speed);
 
     }
 
@@ -114,23 +114,31 @@ void turn_to_theta() {
 
     float ir0 = IRSensor0.getDistanceInMM();
     float ir1 = IRSensor1.getDistanceInMM();
+    float diff = abs(ir1 - ir0);
     float offset  = 46;  // mm
     float minDist = 100; // mm
 
     float distance;
-    if(ir1 >= minDist + offset) {
-      // both sensors far enough
-      distance  = (ir0 + (ir1 - offset)) / 2;
-    } else {
+    if(diff < 40) {
       // IR0 is too close
       distance = ir1 - offset;
+    } else if((ir0 + offset) >= 400) {
+      // IR1 is too far
+      distance = ir0;
+    } else if(ir0 >= ir1) {
+      // both sensors too close
+      distance = 0;
+    } else {
+      // both sensors far enough
+      distance  = (ir0 + (ir1 - offset)) / 2;
     }
 
-    distances[degrees] += distance;
-    distances[degrees] /= 2;
-    Serial.print(ir0);
-    Serial.print(",");
-    Serial.println(ir1);
+    distances[degrees] = (distances[degrees] + ir0) / 2;
+    distances2[degrees] = (distances[degrees] + distance) / 2;
+
+    // Serial.print(ir0);
+    // Serial.print(",");
+    // Serial.println(ir1);
 
   } else {
 
@@ -170,6 +178,15 @@ void print_distances() {
       for (int i=0; i < 360; i++){
         if (i != 0) Serial.print(",");
         Serial.print(distances[i]);
+      }
+      Serial.println("]");
+      Serial.println("Done");
+
+      Serial.print("[");
+      // Print distances here
+      for (int i=0; i < 360; i++){
+        if (i != 0) Serial.print(",");
+        Serial.print(distances2[i]);
       }
       Serial.println("]");
       Serial.println("Done");
