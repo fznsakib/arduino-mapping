@@ -1,3 +1,5 @@
+from __future__ import division
+import numpy as np
 
 box_33_one_0 = [0.42334902832469923, 0.2468998750747229, -0.1764491532499763]
 box_33_two_0 = [0.3039763695648542, 0.03089364740653604, -0.27308272215831814]
@@ -64,7 +66,7 @@ box_44_two_9 = [0.3710657379742907, 0.004880732995655349, -0.3661850049786354]
 box_66_one_0 = [1.8499282039969678, 1.738877436764595, -0.11105076723237282]
 box_66_two_0 = [1.1372824687880427, 0.12713842132807465, -1.010144047459968]
 
-box_66_one_1 = [1.8455690790688184 1.7441978754700718 -0.10137120359874634]
+box_66_one_1 = [1.8455690790688184, 1.7441978754700718, -0.10137120359874634]
 box_66_two_1 = [1.115673146983155, 0.13955308139756756, -0.9761200655855873]
 
 box_66_one_2 = [1.7801806073338051, 1.6602770328154464, -0.11990357451835876]
@@ -90,3 +92,41 @@ box_66_two_8 = [1.1700285016482548, 0.1525309145499988, -1.0174975870982559]
 
 box_66_one_9 = [1.928828208614011, 1.793180768032877, -0.13564744058113398]
 box_66_two_9 = [1.1686193121362103, 0.14043743090508778, -1.0281818812311225]
+
+box_33_one_0 = np.array(box_33_one_0); box_44_one_0 = np.array(box_44_one_0); box_66_one_0 = np.array(box_66_one_0);
+box_33_two_0 = np.array(box_33_two_0); box_44_two_0 = np.array(box_44_two_0); box_66_two_0 = np.array(box_66_two_0);
+box_33_one_1 = np.array(box_33_one_1); box_44_one_1 = np.array(box_44_one_1); box_66_one_1 = np.array(box_66_one_1);
+box_33_two_1 = np.array(box_33_two_1); box_44_two_1 = np.array(box_44_two_1); box_66_two_1 = np.array(box_66_two_1);
+box_33_one_2 = np.array(box_33_one_2); box_44_one_2 = np.array(box_44_one_2); box_66_one_2 = np.array(box_66_one_2);
+box_33_two_2 = np.array(box_33_two_2); box_44_two_2 = np.array(box_44_two_2); box_66_two_2 = np.array(box_66_two_2);
+box_33_one_3 = np.array(box_33_one_3); box_44_one_3 = np.array(box_44_one_3); box_66_one_3 = np.array(box_66_one_3);
+box_33_two_3 = np.array(box_33_two_3); box_44_two_3 = np.array(box_44_two_3); box_66_two_3 = np.array(box_66_two_3);
+box_33_one_4 = np.array(box_33_one_4); box_44_one_4 = np.array(box_44_one_4); box_66_one_4 = np.array(box_66_one_4);
+box_33_two_4 = np.array(box_33_two_4); box_44_two_4 = np.array(box_44_two_4); box_66_two_4 = np.array(box_66_two_4);
+box_33_one_5 = np.array(box_33_one_5); box_44_one_5 = np.array(box_44_one_5); box_66_one_5 = np.array(box_66_one_5);
+box_33_two_5 = np.array(box_33_two_5); box_44_two_5 = np.array(box_44_two_5); box_66_two_5 = np.array(box_66_two_5);
+box_33_one_6 = np.array(box_33_one_6); box_44_one_6 = np.array(box_44_one_6); box_66_one_6 = np.array(box_66_one_6);
+box_33_two_6 = np.array(box_33_two_6); box_44_two_6 = np.array(box_44_two_6); box_66_two_6 = np.array(box_66_two_6);
+box_33_one_7 = np.array(box_33_one_7); box_44_one_7 = np.array(box_44_one_7); box_66_one_7 = np.array(box_66_one_7);
+box_33_two_7 = np.array(box_33_two_7); box_44_two_7 = np.array(box_44_two_7); box_66_two_7 = np.array(box_66_two_7);
+box_33_one_8 = np.array(box_33_one_8); box_44_one_8 = np.array(box_44_one_8); box_66_one_8 = np.array(box_66_one_8);
+box_33_two_8 = np.array(box_33_two_8); box_44_two_8 = np.array(box_44_two_8); box_66_two_8 = np.array(box_66_two_8);
+box_33_one_9 = np.array(box_33_one_9); box_44_one_9 = np.array(box_44_one_9); box_66_one_9 = np.array(box_66_one_9);
+box_33_two_9 = np.array(box_33_two_9); box_44_two_9 = np.array(box_44_two_9); box_66_two_9 = np.array(box_66_two_9);
+
+box_33_one_avg = np.array(box_33_one_0 + box_33_one_1 + box_33_one_2 + box_33_one_3 + box_33_one_4 + box_33_one_5 + box_33_one_6 + box_33_one_7 + box_33_one_8 + box_33_one_9) / 10.0
+box_44_one_avg = np.array(box_44_one_0 + box_44_one_1 + box_44_one_2 + box_44_one_3 + box_44_one_4 + box_44_one_5 + box_44_one_6 + box_44_one_7 + box_44_one_8 + box_44_one_9) / 10.0
+box_66_one_avg = np.array(box_66_one_0 + box_66_one_1 + box_66_one_2 + box_66_one_3 + box_66_one_4 + box_66_one_5 + box_66_one_6 + box_66_one_7 + box_66_one_8 + box_66_one_9) / 10.0
+
+box_33_two_avg = np.array(box_33_two_0 + box_33_two_1 + box_33_two_2 + box_33_two_3 + box_33_two_4 + box_33_two_5 + box_33_two_6 + box_33_two_7 + box_33_two_8 + box_33_two_9) / 10.0
+box_44_two_avg = np.array(box_44_two_0 + box_44_two_1 + box_44_two_2 + box_44_two_3 + box_44_two_4 + box_44_two_5 + box_44_two_6 + box_44_two_7 + box_44_two_8 + box_44_two_9) / 10.0
+box_66_two_avg = np.array(box_66_two_0 + box_66_two_1 + box_66_two_2 + box_66_two_3 + box_66_two_4 + box_66_two_5 + box_66_two_6 + box_66_two_7 + box_66_two_8 + box_66_two_9) / 10.0
+
+print "1 sensor, 33cm", box_33_one_avg
+print "1 sensor, 44cm", box_44_one_avg  
+print "1 sensor, 66cm", box_66_one_avg  
+
+print "2 sensors, 33cm", box_33_two_avg
+print "2 sensors, 44cm", box_44_two_avg  
+print "2 sensors, 66cm", box_66_two_avg  
+
