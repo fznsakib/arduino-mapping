@@ -1,4 +1,4 @@
-#include "CW1.h"
+#include "CW2.h"
 
 #define STATE_INITIAL            0
 #define STATE_TURN_TO_THETA      1
@@ -107,8 +107,8 @@ void turn_to_theta() {
 
     }
 
-    drive_motor(LEFT_MOTOR,  left_speed_output);
-    drive_motor(RIGHT_MOTOR, right_speed_output);
+    // drive_motor(LEFT_MOTOR,  left_speed_output);
+    // drive_motor(RIGHT_MOTOR, right_speed_output);
 
     int degrees = floor(kinematics.get_theta() * 180 / M_PI);
 
@@ -119,7 +119,7 @@ void turn_to_theta() {
     float minDist = 100; // mm
 
     float distance;
-    if(diff < 40) {
+    if(diff < 42) {
       // IR0 is too close
       distance = ir1 - offset;
     } else if((ir0 + offset) >= 400) {
@@ -133,12 +133,13 @@ void turn_to_theta() {
       distance  = (ir0 + (ir1 - offset)) / 2;
     }
 
-    distances[degrees] = (distances[degrees] + ir0) / 2;
+    distances[degrees] += 1;
     distances2[degrees] = (distances[degrees] + distance) / 2;
 
-    // Serial.print(ir0);
-    // Serial.print(",");
-    // Serial.println(ir1);
+    Serial.print(ir0);
+    Serial.print(",");
+    Serial.println(ir1);
+    delay(5);
 
   } else {
 
@@ -173,16 +174,15 @@ void print_distances() {
     if ( btn_b == LOW ) {
       mode = 0;
 
-      Serial.print("[");
+      Serial.print("box_66_one_n = [");
       // Print distances here
       for (int i=0; i < 360; i++){
         if (i != 0) Serial.print(",");
         Serial.print(distances[i]);
       }
       Serial.println("]");
-      Serial.println("Done");
 
-      Serial.print("[");
+      Serial.print("box_66_two_n = [");
       // Print distances here
       for (int i=0; i < 360; i++){
         if (i != 0) Serial.print(",");
