@@ -1,6 +1,10 @@
 # arduino-mapping
 An experiment performed testing the mapping capabilities of an Arduino Romi 32U4 using an IR proximity sensor.
 
-![errors](graphs/results_visualisation.svg "Error visualisation")
+<p align="center">
+  <img src="graphs/results_visualisation.svg" alt="Results visualisation">
+</p>
 
-![results](graphs/error_visualisation.svg "Results visualisation")
+<p align="center">
+  <img src="graphs/error_visualisation.svg" alt="Error visualisation">
+</p>
