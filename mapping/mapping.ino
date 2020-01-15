@@ -1,4 +1,4 @@
-#include "CW2.h"
+#include "mapping.h"
 
 #define STATE_INITIAL            0
 #define STATE_TURN_TO_THETA      1
