@@ -4,7 +4,7 @@ This repository contains code written to test the capabilities of environment ma
 
 It also includes a report detailing the design of the experiment, implementations and evaluation of performance between the baseline and optimised solutions.
 
-The experiment and its implementations have been carried out on a Pololu Romi 32U4 with a Sharp GP2Y0A60SZLF IR proximity sensor.
+The experiment and its implementations have been carried out on a [Pololu Romi 32U4](https://www.pololu.com/product/3544) with a [Sharp GP2Y0A60SZLF](https://www.pololu.com/product/2474) IR proximity sensor.
 
 ## Team
 
@@ -25,7 +25,7 @@ Produced as part of the *Robotics Systems* unit at the University of Bristol.
 measured at.
  
 Independent variables:
-  - Number of proximity sensors used (1 and 2)
+  - Number of IR proximity sensors used (1 or 2)
   - Size of square perimeter
   
 Dependent variable:
