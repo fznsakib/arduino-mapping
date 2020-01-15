@@ -41,6 +41,12 @@ A bird’s-eye view of the experiment.
 
 ## Results
 
+The main qualitative metric used to assess the performance of the subsystem was plotting the estimated coordinate values produced by the robot, overlaid with the ground truth coordinates that represent the perimeter. These plots allowed us to visually inspect the results and make inferences about the performance that would otherwise have been hard to make.
+
+<p align="center">
+  <img src="graphs/error_visualisation.svg" alt="Error visualisation">
+</p>
+
 The results highlighted the improvement from using two IR sensors for square perimeters of length 33cm and 66cm. The second sensor was able to accurately measure the small distances, which were previously over-estimated. Finally, the performance for the larger perimeter, although not perfect, was significantly better using two proximity sensors.
 
 <p align="center">
@@ -48,10 +54,4 @@ The results highlighted the improvement from using two IR sensors for square per
 </p>
 
 
-<p align="center">
-  <img src="graphs/results_visualisation.svg" alt="Results visualisation">
-</p>
 
-<p align="center">
-  <img src="graphs/error_visualisation.svg" alt="Error visualisation">
-</p>
