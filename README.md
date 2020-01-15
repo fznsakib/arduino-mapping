@@ -16,7 +16,37 @@ Produced as part of the *Robotics Systems* unit at the University of Bristol.
 
 > Infrared proximity sensors perform with a varying degree of accuracy, determined by the distance being measured. They are prone to a higher degree of error at the limits of their operation. External factors based on the environment and the system itself can introduce additional error. We hypothesise that with the introduction of a second sensor positioned appropriately, smaller distances can be reliably measured where previously not possible due to an increased combined range of distance covered. Furthermore, a combination of two sensor readings will help to produce better estimations.
 
+## Experiment
+
+1. The robot is placed in the centre of a square perimeter acting as a wall obstacle, with sides of length n cm
+2. Starting from the direction it is facing, the robot is switched on and rotates a full circle in a clockwise direction.
+3. During the rotation, distance measurements from the proximity sensor are taken for the angle it is facing.
+4. The resulting output is an array of distances with the index of each value corresponding to the angle it was
+measured at.
+ 
+Independent variables:
+  - Number of proximity sensors used (1 and 2)
+  - Size of square perimeter
+  
+Dependent variable:
+  - Distance measurements obtained
+  
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/15062683/72469075-96c14900-37d6-11ea-91b5-4b1dea3bf283.png" alt="Results visualisation" width=300>
+</p>
+
+<p align="center">
+A bird’s-eye view of the experiment.
+</p>
+
 ## Results
+
+The results highlighted the improvement from using two IR sensors for square perimeters of length 33cm and 66cm. The second sensor was able to accurately measure the small distances, which were previously over-estimated. Finally, the performance for the larger perimeter, although not perfect, was significantly better using two proximity sensors.
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/15062683/72469391-34b51380-37d7-11ea-8486-437792bc4372.png">
+</p>
+
 
 <p align="center">
   <img src="graphs/results_visualisation.svg" alt="Results visualisation">
